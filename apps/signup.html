@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Signup - SahuAI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/country-select-js@2.0.1/build/css/countrySelect.min.css" />
+  <link rel="apple-touch-icon" href="/static/sahuAI.png" />
+  <link rel="icon" type="image/png" href="/static/sahuAI.png" />
+
+  <style>
+  .country-select .country-list {
+    background-color: #111; /* dark background */
+    color: white;
+  }
+
+  .country-select .country-list .flag {
+    margin-right: 8px;
+  }
+
+  .country-select .country-list li {
+    padding: 8px 10px;
+  }
+
+  .country-select .country-list li:hover {
+    background-color: #4c1d95; /* purple hover */
+    color: white;
+  }
+</style>
+
+</head>
+<body class="bg-black text-white flex items-center justify-center h-screen">
+
+  <div class="bg-gray-900 p-8 rounded-2xl shadow-2xl w-full max-w-md space-y-5">
+    <h2 class="text-3xl font-bold text-purple-400 text-center">📝 Create Your SahuAI Account</h2>
+    <input id="firstName" type="text" placeholder="👤 First Name" class="w-full p-2 rounded bg-black text-aqua border border-purple-600" />
+    <input id="lastName" type="text" placeholder="👤 Last Name" class="w-full p-2 rounded bg-black text-aqua border border-purple-600" />
+
+    <input id="email" type="email" placeholder="📧 Email" class="w-full p-2 rounded bg-black text-aqua border border-purple-600" />
+    <input id="password" type="password" placeholder="🔒 Password" class="w-full p-2 rounded bg-black text-aqua border border-purple-600" />
+    <label class="text-sm text-gray-300 flex items-center gap-2">
+      <input id="togglePassword" type="checkbox" class="accent-purple-500" /> Show Password
+    </label>
+    <input id="age" type="number" placeholder="🎂 Age" min="1" max="120" required class="w-full p-2 rounded bg-black text-aqua border border-purple-600" />
+    <input id="country" type="text" placeholder="🌍 Select Country" required class="w-full p-2 rounded bg-black text-aqua border border-purple-600" />
+
+    <button id="signupBtn" class="bg-purple-600 hover:bg-purple-700 w-full py-2 rounded text-white font-medium">
+      🧠 Create Account
+    </button>
+
+    <button id="googleSignup" class="bg-white text-black w-full py-2 rounded flex items-center justify-center border border-gray-300">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5 mr-2" /> Continue with Google
+    </button>
+
+    <p id="error-message" class="text-red-400 text-sm text-center"></p>
+
+    <p class="text-sm text-center">
+      Already have an account? <a href="login.html" class="text-purple-400 hover:underline">Login</a>
+    </p>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/country-select-js@2.0.1/build/js/countrySelect.min.js"></script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import {
+    getAuth,
+    createUserWithEmailAndPassword,
+    updateProfile,
+    signInWithPopup,
+    GoogleAuthProvider
+  } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+  import {
+    getFirestore,
+    doc,
+    setDoc,
+    getDoc
+  } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBdDLFeL3GP6jh9PQa601e1_bLfSLK_0IU",
+    authDomain: "user-account-manager-1220b.firebaseapp.com",
+    projectId: "user-account-manager-1220b",
+    storageBucket: "user-account-manager-1220b.appspot.com",
+    messagingSenderId: "943330354935",
+    appId: "1:943330354935:web:0fc86511d3b466c114d5f2"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const provider = new GoogleAuthProvider();
+
+  document.addEventListener("DOMContentLoaded", () => {
+    $("#country").countrySelect();
+
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    const ageInput = document.getElementById("age");
+    const countryInput = document.getElementById("country");
+    const signupBtn = document.getElementById("signupBtn");
+    const errorMsg = document.getElementById("error-message");
+    const togglePwd = document.getElementById("togglePassword");
+
+    togglePwd.addEventListener("change", () => {
+      passwordInput.type = togglePwd.checked ? "text" : "password";
+    });
+
+    signupBtn.addEventListener("click", async (e) => {
+      e.preventDefault();
+      errorMsg.textContent = "";
+
+      const firstName = document.getElementById("firstName").value.trim();
+      const lastName = document.getElementById("lastName").value.trim();
+      const email = emailInput.value.trim().toLowerCase();
+      const password = passwordInput.value.trim();
+      const age = parseInt(ageInput.value.trim());
+      const country = countryInput.value.trim();
+
+      if (!firstName || !lastName || !email || !password || !age || !country) {
+        errorMsg.textContent = "⚠️ Please fill in all fields.";
+        return;
+      }
+
+      try {
+        // ✅ Check if email doc already exists in Firestore
+        const userDocRef = doc(db, "users", email);
+        const userDocSnap = await getDoc(userDocRef);
+
+        if (userDocSnap.exists()) {
+          errorMsg.textContent = "❌ This email is already registered.";
+          return;
+        }
+
+        const result = await createUserWithEmailAndPassword(auth, email, password);
+        const user = result.user;
+
+        await updateProfile(user, {
+          displayName: `${firstName} ${lastName}`,
+          photoURL: `https://ui-avatars.com/api/?name=${firstName}+${lastName}&background=0D0D0D&color=ffffff`
+        });
+
+        await setDoc(userDocRef, {
+          email: user.email,
+          uid: user.uid,
+          age,
+          country,
+          firstName,
+          lastName,
+          provider: "email",
+          created_at: new Date().toISOString(),
+          lastLogin: new Date().toISOString(),
+          role: "user", // You are "admin", others get "user"
+          usage: {
+            gemini: 0,
+            openai: 0,
+            together: 0
+          }
+        });
+
+        window.location.href = "/apps/SahuAI.html";
+      } catch (error) {
+        console.error("Signup error:", error);
+        errorMsg.textContent =
+          "❌ " +
+          (error.code === "auth/email-already-in-use"
+            ? "Email already in use."
+            : "Signup failed. Try again.");
+      }
+    });
+
+    // 🔑 Google Signup
+    document.getElementById("googleSignup").addEventListener("click", async (e) => {
+      e.preventDefault();
+      try {
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        const email = user.email.toLowerCase();
+
+        const userDocRef = doc(db, "users", email);
+
+        // Only add usage/stats if this is the first login
+        const snap = await getDoc(userDocRef);
+        if (!snap.exists()) {
+          await setDoc(userDocRef, {
+            email: user.email,
+            uid: user.uid,
+            name: user.displayName || "Google User",
+            photo: user.photoURL || null,
+            provider: "google",
+            created_at: new Date().toISOString(),
+            lastLogin: new Date().toISOString(),
+            role: "user",
+            usage: {
+              gemini: 0,
+              openai: 0,
+              together: 0
+            }
+          });
+        }
+
+        window.location.href = "/apps/complete-profile.html";
+      } catch (error) {
+        console.error("Google signup error:", error);
+        errorMsg.textContent = "❌ Google signup failed. Try again.";
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

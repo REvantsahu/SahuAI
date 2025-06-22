@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔄 Authenticating | SahuAI</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
+  <script src="https://unpkg.com/three@0.153.0/build/three.min.js"></script>
+
+  <link rel="apple-touch-icon" href="/static/sahuAI.png" />
+  <link rel="icon" type="image/png" href="/static/sahuAI.png" />
+
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: black;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    #bgCanvas {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      z-index: 0;
+    }
+
+    .console {
+      font-family: 'Fira Code', monospace;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 2rem;
+      border-radius: 1rem;
+      color: #a78bfa;
+      max-width: 90vw;
+      box-shadow: 0 0 40px #9333ea77;
+      border: 1px solid #6b21a8;
+      z-index: 10;
+    }
+
+    .typing::after {
+      content: "_";
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .glow-ring {
+      width: 80px;
+      height: 80px;
+      border: 6px solid transparent;
+      border-top: 6px solid #a78bfa;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+
+<body class="flex flex-col items-center justify-center min-h-screen text-white relative z-10">
+  <canvas id="bgCanvas"></canvas>
+
+  <div class="console text-sm text-left">
+    <h1 class="text-2xl font-bold mb-3 text-purple-400">🧠 SahuAI Core Loading</h1>
+    <div id="consoleLogs" class="typing">
+      > Initializing systems...
+    </div>
+    <div class="glow-ring"></div>
+  </div>
+
+  <!-- 🔐 Auth Redirect -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBdDLFeL3GP6jh9PQa601e1_bLfSLK_0IU",
+      authDomain: "user-account-manager-1220b.firebaseapp.com",
+      projectId: "user-account-manager-1220b",
+      storageBucket: "user-account-manager-1220b.appspot.com",
+      messagingSenderId: "943330354935",
+      appId: "1:943330354935:web:0fc86511d3b466c114d5f2",
+      measurementId: "G-ECERWB4FDH"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("✅ Logged in:", user.email);
+        window.location.href = "/apps/SahuAI.html";
+      } else {
+        console.log("🚫 No user logged in.");
+        window.location.href = "/apps/sahu.html";
+      }
+    });
+
+    // Typewriter Bootup Console Text
+    const logs = [
+      "Loading Tensor Core Modules...",
+      "Establishing Neural Sync...",
+      "Connecting to Firebase Security Mesh...",
+      "Initializing Memory Drive...",
+      "Activating SahuAI Interface...",
+    ];
+
+    let current = 0;
+    const logElem = document.getElementById("consoleLogs");
+
+    function typeNextLog() {
+      if (current >= logs.length) return;
+      logElem.innerHTML += `<br>> ${logs[current++]}`;
+      setTimeout(typeNextLog, 1000);
+    }
+
+    setTimeout(typeNextLog, 1200);
+  </script>
+
+  <!-- 🔮 THREE.js Animated Particles -->
+  <script>
+    const canvas = document.getElementById("bgCanvas");
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, innerWidth / innerHeight, 0.1, 1000);
+    camera.position.z = 15;
+
+    const renderer = new THREE.WebGLRenderer({ canvas });
+    renderer.setSize(innerWidth, innerHeight);
+
+    const particles = new THREE.BufferGeometry();
+    const count = 1500;
+
+    const positions = new Float32Array(count * 3);
+    for (let i = 0; i < count * 3; i++) {
+      positions[i] = (Math.random() - 0.5) * 40;
+    }
+
+    particles.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    const material = new THREE.PointsMaterial({ color: 0x9333ea, size: 0.15 });
+    const pointCloud = new THREE.Points(particles, material);
+    scene.add(pointCloud);
+
+    function animate() {
+      requestAnimationFrame(animate);
+      pointCloud.rotation.y += 0.001;
+      pointCloud.rotation.x += 0.001;
+      renderer.render(scene, camera);
+    }
+
+    animate();
+
+    window.addEventListener("resize", () => {
+      camera.aspect = innerWidth / innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(innerWidth, innerHeight);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🧠 Complete Your SahuAI Profile</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/country-select-js@2.0.1/build/css/countrySelect.min.css" />
+  <link rel="apple-touch-icon" href="/static/sahuAI.png" />
+  <link rel="icon" type="image/png" href="/static/sahuAI.png" />
+
+  <style>
+      .country-select .country-list {
+    background-color: #111; /* dark background */
+    color: white;
+  }
+
+  .country-select .country-list .flag {
+    margin-right: 8px;
+  }
+
+  .country-select .country-list li {
+    padding: 8px 10px;
+  }
+
+  .country-select .country-list li:hover {
+    background-color: #4c1d95; /* purple hover */
+    color: white;
+  }
+  </style>
+</head>
+
+<body class="bg-gradient-to-br from-black via-gray-900 to-purple-900 text-white min-h-screen flex items-center justify-center">
+
+  <div class="bg-gray-800 p-8 rounded-2xl shadow-2xl w-full max-w-md border border-purple-500">
+    <h1 class="text-3xl font-extrabold text-center mb-6 text-purple-400 tracking-wide">📝 Complete Your Profile</h1>
+
+    <form id="profileForm" class="space-y-5">
+      <div>
+        <label for="age" min="1" max="120" class="block text-sm font-medium mb-1 text-purple-300">Your Age</label>
+        <input type="number" id="age" min="1" max="120" required class="w-full px-4 py-2 rounded bg-black text-aqua border border-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500">
+      </div>
+
+      <div>
+        <label for="country" class="block text-sm font-medium mb-1 text-purple-300">Country</label>
+        <input type="text" id="country" required class="w-full px-4 py-2 rounded bg-black text-aqua border border-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500">
+      </div>
+
+      <p id="error" class="text-red-400 text-sm text-center"></p>
+
+      <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 transition duration-200 text-white font-semibold py-2 px-4 rounded shadow-lg">
+        ✅ Save & Launch SahuAI
+      </button>
+    </form>
+  </div>
+
+  <!-- jQuery & Country Select -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/country-select-js@2.0.1/build/js/countrySelect.min.js"></script>
+
+  <!-- Firebase Script -->
+ <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+  import {
+    getFirestore,
+    doc,
+    updateDoc
+  } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBdDLFeL3GP6jh9PQa601e1_bLfSLK_0IU",
+    authDomain: "user-account-manager-1220b.firebaseapp.com",
+    projectId: "user-account-manager-1220b",
+    storageBucket: "user-account-manager-1220b.appspot.com",
+    messagingSenderId: "943330354935",
+    appId: "1:943330354935:web:0fc86511d3b466c114d5f2"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  document.addEventListener("DOMContentLoaded", () => {
+    $("#country").countrySelect();
+
+    const form = document.getElementById("profileForm");
+    const errorMsg = document.getElementById("error");
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        errorMsg.textContent = "";
+
+        const age = parseInt(document.getElementById("age").value);
+        const country = document.getElementById("country").value.trim();
+
+        if (isNaN(age) || age < 1 || age > 120 || !country) {
+          errorMsg.textContent = "⚠️ Please enter valid age and country.";
+          return;
+        }
+
+        try {
+          const docRef = doc(db, "users", user.email);
+
+          await updateDoc(docRef, {
+            age: age,
+            country: country
+          });
+
+          window.location.href = "../apps/SahuAI.html";
+        } catch (err) {
+          console.error("Profile update error:", err);
+          errorMsg.textContent = "❌ Something went wrong. Try again.";
+        }
+      });
+    });
+  });
+</script>
+
+</body>
+
+</html>
