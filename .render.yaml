@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: sahuai
+    env: python
+    plan: free
+    pythonVersion: 3.11.8
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    autoDeploy: true
