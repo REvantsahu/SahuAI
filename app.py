@@ -780,28 +780,6 @@ Question: {prompt}
         print("❌ Error in /speak-mode:", e)
         return jsonify({ "reply": "Something broke while thinking..." }), 500
 
-
-# Route for login.html in /apps
-@app.route("/apps/login.html")
-def login():
-    return send_from_directory("apps", "login.html")
-
-# Route for signup.html in /apps
-@app.route("/apps/signup.html")
-def signup():
-    return send_from_directory("apps", "signup.html")
-
-# Route for sahuAI.html
-@app.route("/apps/SahuAI.html")
-def sahuai():
-    return send_from_directory("apps", "SahuAI.html")
-
-
-# ✅ Serve any HTML file from /apps/
-@app.route("/apps/<path:filename>")
-def serve_app_html(filename):
-    return send_from_directory("apps", filename)
-
 # ✅ Serve any static file from /static/
 @app.route("/static/<path:filename>")
 def serve_static_files(filename):

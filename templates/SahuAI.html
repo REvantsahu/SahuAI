@@ -1808,7 +1808,7 @@ const db = getFirestore(app);
 window.sahuUser = null;
 
 onAuthStateChanged(auth, async (user) => {
-  if (!user) return (window.location.href = "/apps/sahu.html");
+  if (!user) return (window.location.href = "sahu.html");
 
   const email = user.email.toLowerCase();
   const userDocRef = doc(db, "users", email);

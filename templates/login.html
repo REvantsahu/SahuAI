@@ -101,7 +101,7 @@
           lastLogin: new Date().toISOString()
         }, { merge: true });
 
-        window.location.href = "../apps/SahuAI.html";
+        window.location.href = "SahuAI.html";
       } catch (err) {
         console.error("Login error:", err);
         errMsg.textContent = "❌ " + (
@@ -132,7 +132,7 @@
             lastLogin: new Date().toISOString()
           }, { merge: true });
 
-          window.location.href = "/apps/complete-profile.html";
+          window.location.href = "complete-profile.html";
           return;
         }
 
@@ -140,7 +140,7 @@
           lastLogin: new Date().toISOString()
         }, { merge: true });
 
-        window.location.href = "../apps/SahuAI.html";
+        window.location.href = "SahuAI.html";
       } catch (error) {
         console.error("Google login error:", error);
         errMsg.textContent = "❌ " + (
