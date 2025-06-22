@@ -1,1 +1,2 @@
-web: gunicorn SahuAl_Server:app
+web: gunicorn app:app
+
